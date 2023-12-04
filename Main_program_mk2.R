@@ -19,7 +19,7 @@ colnames(penguins_speciesReformat) <- NULL
 set.seed(69)
 penguins_cleaned_random <- penguins_speciesReformat[sample(nrow(penguins_speciesReformat)), ]
 
-train_size_list <- c(0.5, 0.7, 0.9)
+train_size_list <- c(0.5, 0.3, 0.1)
 learning_rate_list <- c(0.001, 0.01, 0.1, 0.5)
 epochs_list <- c(10, 50, 100, 200, 500, 1000, 5000)
 
