@@ -79,37 +79,22 @@ Validate <- function(ml_model, train_dataset, validation_dataset, number_of_iter
     
   }
   
-  num_classes <- nrow(confusion_matrix)
+  # Confusion_matrix is a 3x3 matrix
+  TP <- confusion_matrix[1, 1] + confusion_matrix[2, 2] + confusion_matrix[3, 3]
+  FP <- confusion_matrix[1, 2] + confusion_matrix[1, 3] + confusion_matrix[2, 1]
+  FN <- confusion_matrix[2, 3] + confusion_matrix[3, 2] + confusion_matrix[3, 1]
   
-  # Initialize vectors to store precision, recall, and f1 for each class
-  precision_per_class <- numeric(num_classes)
-  recall_per_class <- numeric(num_classes)
-  f1_score_per_class <- numeric(num_classes)
+  # Calculate precision and recall
+  precision <- TP / (TP + FP)
+  recall <- TP / (TP + FN)
   
-  for (i in 1:num_classes) {
-    true_positives <- confusion_matrix[i, i]
-    false_positives <- sum(confusion_matrix[, i]) - true_positives
-    false_negatives <- sum(confusion_matrix[i, ]) - true_positives
-    
-    # Calculate precision
-    precision_per_class[i] <- true_positives / (true_positives + false_positives)
-    
-    # Calculate recall
-    recall_per_class[i] <- true_positives / (true_positives + false_negatives)
-    
-    # Calculate F1 score
-    f1_score_per_class[i] <- 2 * (precision_per_class[i] * recall_per_class[i]) / (precision_per_class[i] + recall_per_class[i])
-  }
-  
-  # Calculate macro-averages
-  precision_avg <- mean(precision_per_class, na.rm = TRUE)
-  recall_avg <- mean(recall_per_class, na.rm = TRUE)
-  f1_score_avg <- mean(f1_score_per_class, na.rm = TRUE)
+  # Calculate F1 score
+  f1_score <- 2 * (precision * recall) / (precision + recall)
   
   cat(paste(
-    "Precision Avg =", round(precision_avg * 100, digits = 2),
-    "% | Recall Avg =", round(recall_avg * 100, digits = 2),
-    "% | F1 Score Avg =", round(f1_score_avg * 100, digits = 2), "%\n"
+    "\nPrecision Avg =", round(precision * 100, digits = 2),
+    "% | Recall Avg =", round(recall * 100, digits = 2),
+    "% | F1 Score Avg =", round(f1_score * 100, digits = 2), "%\n"
   ))
   
   accuracy_validation <- correct/ total
@@ -122,6 +107,13 @@ Validate <- function(ml_model, train_dataset, validation_dataset, number_of_iter
   sapply(distinct_classes, function(category){
     precison <- (confusion_matrix[category,category]*100)/ sum(confusion_matrix[category,]);
   })
-
+  result_df <- data.frame(
+    Precision = round(precision * 100, digits = 2),
+    Recall = round(recall * 100, digits = 2),
+    F1_Score = round(f1_score * 100, digits = 2),
+    Accuracy_Train = round(accuracy_training * 100, digits = 2),
+    Accuracy_Val = round(accuracy_validation * 100, digits = 2)
+  )
+  return(result_df)
   
 }
