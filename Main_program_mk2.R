@@ -21,7 +21,7 @@ penguins_cleaned_random <- penguins_speciesReformat[sample(nrow(penguins_species
 
 train_size_list <- c(0.5, 0.3, 0.1)
 learning_rate_list <- c(0.001, 0.01, 0.1, 0.5)
-epochs_list <- c(10, 50, 100, 200, 500, 1000, 5000)
+epochs_list <- c(10, 50, 100, 500, 1000, 5000)
 
 source("Perceptron.r")
 source("Evaluation_Cross_Validation.r")
@@ -29,7 +29,9 @@ source("Evaluation_Validation.r")
 source("Evaluation_Curves.r")
 
 # Initialize an empty dataframe
-result_df <- data.frame(Precision = numeric(),
+result_df <- data.frame(Train_Size = numeric(),
+                        Learning_Rate = numeric(),
+                        Precision = numeric(),
                         Recall = numeric(),
                         F1_Score = numeric(),
                         Accuracy_Train = numeric(),
@@ -55,7 +57,6 @@ for (train_size in train_size_list) {
         " | Epochs =", epochs, "\n"
       ))
       
-      
       #plot Learning Curve - Accuracy vs Training Sample size
       plot_learning_curve(penguin_model, penguins_train, penguins_validation, number_of_iterations = num_of_epochs)
       
@@ -72,7 +73,23 @@ for (train_size in train_size_list) {
       iteration_result <- Validate(penguin_model, penguins_train, penguins_validation, number_of_iterations = 10)
       
       # Append the results to the existing dataframe
-      result_df <- rbind(result_df, iteration_result)
+      # Create a temporary dataframe for the current iteration
+      temp_df <- data.frame(
+        Train_Size = train_size,
+        Learning_Rate = learning_rate,
+        Precision = iteration_result$Precision,  # Adjust column names accordingly
+        Recall = iteration_result$Recall,
+        F1_Score = iteration_result$F1_Score,
+        Accuracy_Train = iteration_result$Accuracy_Train,
+        Accuracy_Val = iteration_result$Accuracy_Val
+      )
+      
+      # Append the temporary dataframe to the existing dataframe
+      result_df <- rbind(result_df, temp_df)
+      write.csv(result_df, file = "./result_file.csv", row.names = FALSE)
+      
     }
   }
 }
+colnames(result_df) <- c("Train_Size", "Learning_Rate", "Precision", "Recall", "F1_Score", "Accuracy_Train", "Accuracy_Val")
+
