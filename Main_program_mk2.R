@@ -93,3 +93,20 @@ for (train_size in train_size_list) {
 }
 colnames(result_df) <- c("Train_Size", "Learning_Rate", "Precision", "Recall", "F1_Score", "Accuracy_Train", "Accuracy_Val")
 
+# Add epochs column to the dataframe... whoops i forgot ahah..
+result_df$Epochs <- epochs_list[(seq_len(nrow(result_df)) - 1) %% length(epochs_list) + 1]
+
+result_df$Train_Size <- as.factor(result_df$Train_Size)
+result_df$Learning_Rate <- as.factor(result_df$Learning_Rate)
+
+reshaped_df <- gather(result_df, key = "AccuracyType", value = "Accuracy", Accuracy_Train, Accuracy_Val)
+
+ggplot(reshaped_df, aes(x = factor(Epochs, levels = epochs_list), y = Accuracy, color = AccuracyType, linetype = AccuracyType, group = interaction(Train_Size, Learning_Rate, AccuracyType))) +
+  facet_grid(Train_Size ~ Learning_Rate, scales = "free_y") +
+  geom_line() +
+  geom_point() +
+  labs(title = "Training and Validation Accuracies over Epochs",
+       x = "Epoch",
+       y = "Accuracy") +
+  theme_minimal() +
+  scale_x_discrete(labels = epochs_list)
